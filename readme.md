@@ -14,7 +14,7 @@
 6. If you want to upload the output folder into an s3 bucket you must install the aws sdk on your computer. The upload is done with "aws sync" command.
 7. Replace this variable at the top of the script with your own s3 bucket name:
     
-    s3_destination_bucket = '<YOUR S3 BUCKET>'
+    `s3_destination_bucket = '<YOUR_S3_BUCKET>'`
 
 8. You can fine tune the encoder settings with your choosen bitrates on the PROFILE STREAM dict inside the script.
 Currently the ffmpeg command is a one pass encoding.
@@ -31,8 +31,8 @@ As you can see here ` -metadata:s:a:0 language=spa ` the command is using a 3 le
 
 ### Encode files whitout upload:
 `python hls_encoder.py`
-### Encode files and upload them into you s3 bucket:
+### Encode files and upload them into your s3 bucket:
 `python hls_encoder.py sync_bucket`
 
-The result will be an "output" folder with 5 -or less depending on the input video resolution -different chunked variants and the master playlist (master.m3u8).  If the video file have more than one language inside, these tracks will appear in the output folder too. Keep in mind that the language metadata must be set beforehand in order to show the language on the player as it's shown in the above ffmpeg command.
+The result will be an "output" folder with 5 -or less depending on the input video resolution- different chunked variants and the master playlist (master.m3u8).  If the video file have more than one language inside, these tracks will appear in the output folder too. Keep in mind that the language metadata must be set beforehand in order to show the language on the player as it's shown in the above ffmpeg command.
 All the chunks are **encrypted** using the **aes-128 encryption**. Output video files won't be inflated. This means only the same resolution and lower ones will be done. Never a resolution higher than the original one.
