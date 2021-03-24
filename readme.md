@@ -7,7 +7,7 @@
 3. Move the mp4 files to be encoded into the same folder where the python script and the scripts folder is.
 4. If subtitles are needed , move them into the same folder.
 5. Subtitles must have the same name as the video file with the 2 letters iso code and also the subtitle language. Subtitles must be in srt format.
- ## Example:
+ ### Example:
     video_file: test.mp4
     subtitle_file_english: test_en.srt (english_version)
     subtitle_file_spanish: test_es.srt (spanish_version)
