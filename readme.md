@@ -29,7 +29,7 @@ As you can see here ` -metadata:s:a:0 language=spa ` the command is using a 3 le
 
 ## Usage:
 
-### Encode files whitout upload:
+### Encode files without upload:
 `python hls_encoder.py`
 ### Encode files and upload them into your s3 bucket:
 `python hls_encoder.py sync_bucket`
