@@ -1,38 +1,67 @@
-# HLS Encoder that uses ffmpeg , Bento4 mp4-hls and mediainfo in the background and optionally uploads results into an s3 folder using the aws sdk
+# HLS Encoder
 
+A robust HLS encoder that utilizes **FFmpeg**, **Bento4 mp4-hls**, and **MediaInfo** to convert videos into encrypted HLS streams. It also optionally uploads the resulting streams to an Amazon S3 bucket.
 
-## Before running the script:
-1. ffmpeg, mediainfo and python3 must be installed.
-2. Create a virtual enviroment if python2 is installed on your machine instead of python3. Install python3 inside the virtual enviroment.
-3. Move the mp4 files to be encoded into the same folder where the python script and the scripts folder is.
-4. If subtitles are needed , move them into the same folder.
-5. Subtitles must have the same name as the video file with the 2 letters iso code and also the subtitle language. Subtitles must be in srt format.
- ### Example:
-    video_file: test.mp4
-    subtitle_file_english: test_en.srt (english_version)
-    subtitle_file_spanish: test_es.srt (spanish_version)
-6. If you want to upload the output folder into an s3 bucket you must install the aws sdk on your computer. The upload is done with "aws sync" command.
-7. Replace this variable at the top of the script with your own s3 bucket name:
-    
-    `s3_destination_bucket = '<YOUR_S3_BUCKET>'`
+## Features
 
-8. You can fine tune the encoder settings with your choosen bitrates on the PROFILE STREAM dict inside the script.
-Currently the ffmpeg command is a one pass encoding.
+- Encodes video files to encrypted HLS format (AES-128 encryption).
+- Uses realistic bitrates without inflating the original video resolution.
+- Optional automatic upload to an Amazon S3 bucket.
 
-9. You will need to create a mezzanine file in order to have a compilant input with the encoder. If you have the audio files for other languages in separated mono files, this is the ffmpeg command I use for adding them in a single mezzanine mp4 file:
+## Prerequisites
+
+- **FFmpeg**, **Bento4 mp4-hls**, and **MediaInfo** must be installed on your system.
+- If uploading to S3, the AWS CLI must also be installed and configured.
+
+## Setup Instructions
+
+1. Clone this repository.
+2. Place video files to be encoded in the same directory as the Python script and `scripts` folder.
+3. (Optional) If subtitles are needed, place them in the same directory. Subtitles must:
+   - Be in `.srt` format.
+   - Share the video filename followed by a two-letter ISO language code (e.g., `video_en.srt`).
+
+3. To upload results to S3, update the following variable in the script:
+
+```python
+s3_destination_bucket = '<YOUR_S3_BUCKET>'
+```
+
+## Creating a Mezzanine File (with multiple audio tracks)
+
+If your input video has multiple audio tracks in separate WAV files, use the following command to merge them into a mezzanine MP4 file:
 
 ```shell
-ffmpeg  -i <video file>   -i <spanish language L track wav file>  -i <spanish language R track wav file>  -i <italian language L track wav file>  -i <italian language R track wav file>  -i <italian language L track wav file>  -i <catalan language L track wav file> -i <catalan language R track wav file>   -map 0:v -c:v copy  -filter_complex "[1:0][2:0]amerge=inputs=2[a1]; [3:0][4:0]amerge=inputs=2[a2]; [5:0][6:0]amerge=inputs=2[a3]" -map "[a1]" -map "[a2]" -map "[a3]"  -metadata:s:a:0 language=spa -metadata:s:a:1 language=cat -metadata:s:a:2 language=ita  /<output_folder>/<output_file>.mp4 
-
+ffmpeg -i <video file> \
+       -i <spanish_L.wav> -i <spanish language R track wav file> \
+       -i <italian language L track wav file> -i <italian language R track wav file> \
+       -i <additional language L track wav file> -i <additional language R track wav file> \
+       -filter_complex "[1:0][2:0]amerge=inputs=2[a1]; [3:0][4:0]amerge=inputs=2[a2]; [5:0][6:0]amerge=inputs=2[a3]" \
+       -map 0:v -map "[a1]" -map "[a2]" -map "[a3]" \
+       output.mp4
 ```
-As you can see here ` -metadata:s:a:0 language=spa ` the command is using a 3 letter code iso for adding the language metadata. This is a must if you want to show the language on the video player. 
 
-## Usage:
+**Important**: Ensure that audio language metadata is set correctly (use ISO 639-2 three-letter codes).
 
-### Encode files without upload:
-`python hls_encoder.py`
-### Encode files and upload them into your s3 bucket:
-`python hls_encoder.py sync_bucket`
+## Usage
 
-The result will be an "output" folder with 5 -or less depending on the input video resolution- different chunked variants and the master playlist (master.m3u8).  If the video file have more than one language inside, these tracks will appear in the output folder too. Keep in mind that the language metadata must be set beforehand in order to show the language on the player as it's shown in the above ffmpeg command.
-All the chunks are **encrypted** using the **aes-128 encryption**. Output video files won't be inflated. This means only the same resolution and lower ones will be done. Never a resolution higher than the original one.
+### Encode without uploading:
+```shell
+python hls_encoder.py
+```
+
+### Encode and upload to S3
+
+```shell
+python hls_encoder.py sync
+```
+
+## Features
+
+- AES-128 encryption for secure HLS streaming.
+- Automatically generates video streams equal to or lower than the original resolution to avoid quality inflation.
+
+---
+
+For any contributions, improvements, or issues, please open a GitHub issue or submit a pull request.
+
